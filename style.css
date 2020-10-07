@@ -1,0 +1,33 @@
+/* Tricks to play audio + subtitles without video. See https://iandevlin.com/blog/2015/12/html5/webvtt-and-audio/ */
+.preview-video {
+  border: 1px solid #aaa;
+  object-fit: initial;
+}
+
+.preview-video ::cue {
+  font-size: 16px;
+}
+
+.subtitles-editor {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.subtitles-header {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 1em;
+}
+
+.cues {
+  padding: 0;
+}
+
+.cue-item.playing {
+  background-color: aquamarine;
+}
+
+.cue-item [role=cue-time] {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 1em;
+}

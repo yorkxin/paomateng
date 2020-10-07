@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎞 Pao Ma Teng</title>
+  <link rel="stylesheet" href="./style.css">
+
+  <template id='template-cue-item'>
+    <section class='cue-item'>
+      <h2 role='cue-time'></h2>
+      <div role='cue-text' contenteditable></div>
+    </section>
+  </template>
+</head>
+<body class="wrapper">
+  <div class="preview">
+    <!-- Tricks to play audio + subtitles without video. See https://iandevlin.com/blog/2015/12/html5/webvtt-and-audio/ -->
+    <video id="video" class="preview-video" controls width="600" height="100">
+      <source id="audio"><!-- src, type are dynamic -->
+      <track id="subtitles" label="Working Copy" kind="subtitles" default><!-- src is dynamic -->
+    </video>
+  </div>
+
+  <div class="audio-waveform">
+    <input type="file" name="audio-file" id="audio-file" accept="audio/*">
+    <br>
+    <div id="wave-timeline"></div>
+    <div id="waveform"></div>
+
+    <div class="btn-toolbar">
+      <div class="btn-group mr-2" id="audio-controls">
+        <button type="button" class="btn btn-secondary" id="play-pause-button">▶️</button>
+      </div>
+    </div>
+  </div>
+
+  <article class="subtitles-editor">
+    <h1 class='subtitles-header'>WEBVTT</h1>
+    <br>
+    <div class="cues" id="cues">
+    </div>
+  </article>
+
+  <!-- wavesurfer.js -->
+  <script src="https://unpkg.com/wavesurfer.js/dist/wavesurfer.js"></script>
+
+  <!-- wavesurfer plugins -->
+  <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.timeline.js"></script>
+  <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.regions.js"></script>
+  <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.minimap.js"></script>
+
+  <!-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script> -->
+
+  <script src="./app.js"></script>
+</body>
+</html>
