@@ -9,13 +9,15 @@
 }
 
 .subtitles-editor {
-  font-family: 'Courier New', Courier, monospace;
+  margin: 1em 0;
+  font-family: 'Source Han Mono' /* CJK-friendly */, 'Courier New', Courier, monospace;
 }
 
 .subtitles-header {
   font-style: normal;
   font-weight: normal;
   font-size: 1em;
+  margin: 0;
 }
 
 .cues {
@@ -30,4 +32,5 @@
   font-style: normal;
   font-weight: normal;
   font-size: 1em;
+  margin: 0;
 }

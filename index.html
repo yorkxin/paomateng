@@ -10,6 +10,7 @@
     <section class='cue-item'>
       <h2 role='cue-time'></h2>
       <div role='cue-text' contenteditable></div>
+      <br><!-- Put a line here so that you can select & copy directly -->
     </section>
   </template>
 </head>
@@ -23,6 +24,7 @@
   </div>
 
   <div class="audio-waveform">
+    <!-- TODO: use window.showOpenFilePicker() -->
     <input type="file" name="audio-file" id="audio-file" accept="audio/*">
     <br>
     <div id="wave-timeline"></div>
@@ -37,9 +39,10 @@
 
   <article class="subtitles-editor">
     <h1 class='subtitles-header'>WEBVTT</h1>
-    <br>
+    <br><!-- Blank line, required by WEBVTT format -->
     <div class="cues" id="cues">
     </div>
+    <br><!-- Put a line here so that you can select & copy directly -->
   </article>
 
   <!-- wavesurfer.js -->
