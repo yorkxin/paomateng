@@ -7,11 +7,19 @@ let wavesurfer;
 let quesContainer;
 let audioFileInput;
 let templateOfCueItem;
+let videoPreview;
+let audioInPreview;
+let subtitlesInPreview;
 
 document.addEventListener('DOMContentLoaded', function () {
   templateOfCueItem = document.getElementById('template-cue-item');
   cuesContainer = document.getElementById('cues');
   audioFileInput = document.getElementById('audio-file');
+
+  // Preview Area
+  videoPreview = document.getElementById('video-preview');
+  audioInPreview = document.getElementById('audio-in-preview');
+  subtitlesInPreview = document.getElementById('subtitles-in-preview');
 
   audioFileInput.addEventListener('change', function(event) {
     const file = audioFileInput.files[0];
@@ -19,6 +27,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (file) {
       const blob = URL.createObjectURL(file);
       wavesurfer.load(blob);
+      audioInPreview.src = blob;
+      audioInPreview.type = file.type;
+      videoPreview.load();
     } else {
       // TODO: clearAudio()
     }
@@ -98,9 +109,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
   wavesurfer.on('play', function () {
     playPauseButton.textContent = "⏸️";
+    // TODO: simultaneously play videoPreview
+    // console.log('play at:', wavesurfer.getCurrentTime())
   });
   wavesurfer.on('pause', function () {
     playPauseButton.textContent = "▶️";
+    // TODO: simultaneously pause videoPreview
   });
 
   playPauseButton.addEventListener('click', (event) => {
