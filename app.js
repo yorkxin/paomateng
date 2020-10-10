@@ -39,6 +39,10 @@ document.addEventListener('DOMContentLoaded', function () {
   audioInPreview = document.getElementById('audio-in-preview');
   subtitlesInPreview = document.getElementById('subtitles-in-preview');
 
+  document.getElementById('open-audio-file').addEventListener('click', () => {
+    audioFileInput.click();
+  })
+
   audioFileInput.addEventListener('change', function(event) {
     const file = audioFileInput.files[0];
 
