@@ -8,55 +8,72 @@
   <link rel="stylesheet" href="./style.css">
 
   <template id='template-cue-item'>
-    <section class='cue-item'>
-      <h2 role='cue-time'></h2>
-      <div role='cue-text' contenteditable></div>
-      <br><!-- Put a line here so that you can select & copy directly -->
-    </section>
+    <tr class='editor-cue-item'>
+      <th class="editor-cue-meta">
+        <p class="editor-cue-timestamp">
+          <span class="editor-cue-start"></span>
+          &ndash;
+          <span class="editor-cue-end"></span>
+        </p>
+        <div class="editor-cue-controls">
+          <a href="#" data-ref="play" class="text-decoration-none text-primary">Play</a>
+          &middot;
+          <a href="#" data-ref="delete" class="text-decoration-none text-danger">Delete</a>
+        </div>
+      </th>
+      <td class="editor-cue-text">
+        <textarea class="editor-cue-input" placeholder="Type some texts..." rows="2"></textarea>
+      </td>
+    </tr>
   </template>
 </head>
-<body class="wrapper">
-  <div id="audio-workspace">
-    <!-- TODO: use window.showOpenFilePicker() -->
-    <input type="file" name="audio-file" id="audio-file" accept="audio/*">
-    <br>
-    <div id="wave-timeline"></div>
-    <div id="waveform"></div>
+<body class="container-fluid">
+  <div class="row">
+    <div id="audio-workspace" class="col">
+      <div id="wave-timeline"></div>
+      <div id="waveform"></div>
+    </div>
+  </div>
 
-    <div class="btn-toolbar">
-      <div class="btn-group mr-2" id="audio-controls">
-        <button type="button" class="btn btn-secondary" id="play-pause-button">▶️</button>
+  <div class="row">
+    <div class="col">
+      <div class="btn-toolbar">
+        <div class="btn-group mr-2" id="audio-controls">
+          <button type="button" class="btn btn-outline-primary" id="play-pause-button">▶️</button>
+        </div>
+        <input type="file" name="audio-file" id="audio-file" accept="audio/*">
       </div>
     </div>
   </div>
 
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col">
-        <article class="subtitles-editor">
-          <h1 class='subtitles-header'>WEBVTT</h1>
-          <br><!-- Blank line, required by WEBVTT format -->
-          <div class="cues" id="cues">
-          </div>
-          <br><!-- Put a line here so that you can select & copy directly -->
-        </article>
-      </div>
-      <div class="col">
-        <ul class="nav nav-tabs" id="output-tabs" role="tablist">
-          <li class="nav-item" role="presentation">
-            <a class="nav-link active" id="preview-tab-tab" data-toggle="tab" href="#preview" role="tab" aria-controls="preview" aria-selected="true">Video Preview</a>
-          </li>
-        </ul>
+  <div class="row">
+    <div class="col">
+      <table class="table table-sm table-hover">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Text</th>
+          </tr>
+        </thead>
+        <tbody id="cues">
+        </tbody>
+      </table>
+    </div>
+    <div class="col">
+      <ul class="nav nav-tabs" id="output-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <a class="nav-link active" id="preview-tab-tab" data-toggle="tab" href="#preview" role="tab" aria-controls="preview" aria-selected="true">Video Preview</a>
+        </li>
+      </ul>
 
-        <div class="tab-content" id="output-view">
-          <div class="tab-pane show active" id="preview" role="tabpanel" aria-labelledby="home-tab">
-            <div class="preview">
-              <!-- Tricks to play audio + subtitles without video. See https://iandevlin.com/blog/2015/12/html5/webvtt-and-audio/ -->
-              <video id="video-preview" no-controls muted class="preview-video" width="500" height="100" poster="./black.svg">
-                <source id="audio-in-preview"><!-- src, type are dynamic -->
-                <track id="subtitles-in-preview" label="Working Copy" kind="subtitles" default><!-- src is dynamic -->
-              </video>
-            </div>
+      <div class="tab-content" id="output-view">
+        <div class="tab-pane show active" id="preview" role="tabpanel" aria-labelledby="home-tab">
+          <div class="preview">
+            <!-- Tricks to play audio + subtitles without video. See https://iandevlin.com/blog/2015/12/html5/webvtt-and-audio/ -->
+            <video id="video-preview" no-controls muted class="preview-video" width="500" height="100" poster="./black.svg">
+              <source id="audio-in-preview"><!-- src, type are dynamic -->
+              <track id="subtitles-in-preview" label="Working Copy" kind="subtitles" default><!-- src is dynamic -->
+            </video>
           </div>
         </div>
       </div>

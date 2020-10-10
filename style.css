@@ -8,29 +8,21 @@
   font-size: 16px;
 }
 
-.subtitles-editor {
-  margin: 1em 0;
-  font-family: 'Source Han Mono' /* CJK-friendly */, 'Courier New', Courier, monospace;
-}
-
-.subtitles-header {
-  font-style: normal;
+.editor-cue-meta {
+  width: 15em;
   font-weight: normal;
-  font-size: 1em;
-  margin: 0;
 }
 
-.cues {
-  padding: 0;
+.editor-cue-timestamp {
+  font-family: "SF Mono", monospace;
+  margin-bottom: 0.5rem;
 }
 
-.cue-item.playing {
-  background-color: aquamarine;
+.editor-cue-controls {
+  font-size: 0.8rem;
 }
 
-.cue-item [role=cue-time] {
-  font-style: normal;
-  font-weight: normal;
-  font-size: 1em;
-  margin: 0;
+.editor-cue-input {
+  width: 100%;
+  resize: none;
 }

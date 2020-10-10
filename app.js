@@ -11,6 +11,10 @@ let videoPreview;
 let audioInPreview;
 let subtitlesInPreview;
 
+// the following colors are from Bootstrap 4 background color with alpha
+const REGION_COLOR_PRIMARY = 'rgba(0, 123, 255, 0.3)';
+const REGION_COLOR_SECONDARY = 'rgba(108, 117, 125, 0.3)';
+
 document.addEventListener('DOMContentLoaded', function () {
   templateOfCueItem = document.getElementById('template-cue-item');
   cuesContainer = document.getElementById('cues');
@@ -61,15 +65,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* Regions */
   wavesurfer.on('ready', function () {
-    wavesurfer.enableDragSelection({});
+    wavesurfer.enableDragSelection({
+      color: REGION_COLOR_SECONDARY
+    });
   });
 
   wavesurfer.on('region-click', function (region, e) {
     e.stopPropagation();
-
-    // default mode: transcribing
-    // FIXME: loop not working
-    region.playLoop(region.start);
+    playRegion(region.id);
   });
 
   // wavesurfer.on('region-click', editAnnotation);
@@ -79,6 +82,8 @@ document.addEventListener('DOMContentLoaded', function () {
     cuesContainer.appendChild(cueItem);
     cueItem.id = `cue-${region.id}`;
     cueItem.dataset['region_id'] = region.id;
+    cueItem.querySelector('[data-ref=play]').addEventListener('click', () => playRegion(region.id));
+    cueItem.querySelector('[data-ref=delete]').addEventListener('click', () => deleteRegion(region.id));
     updateCueListItem(cueItem, region);
     bobbleUpCueListItem(cueItem);
   });
@@ -96,12 +101,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   wavesurfer.on('region-in', function (region) {
     const cueItem = document.getElementById(`cue-${region.id}`);
-    cueItem.classList.add('playing');
+    cueItem.classList.add('table-primary');
+    region.update({ color: REGION_COLOR_PRIMARY });
   });
 
   wavesurfer.on('region-out', function (region) {
     const cueItem = document.getElementById(`cue-${region.id}`);
-    cueItem.classList.remove('playing');
+    cueItem.classList.remove('table-primary');
+    region.update({ color: REGION_COLOR_SECONDARY });
   });
 
   /* Toggle play/pause buttons. */
@@ -128,11 +135,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function updateCueListItem(cueItem, region) {
   cueItem.dataset['region_start'] = region.start;
-  cueItem.querySelector('[role=cue-time]').innerText = `${formatTime(region.start)} --> ${formatTime(region.end)}`;
+  cueItem.querySelector('.editor-cue-start').innerText = formatTime(region.start);
+  cueItem.querySelector('.editor-cue-end').innerText = formatTime(region.end);
 }
 
 function formatTime(timestamp) {
-  const minutes = (timestamp / 60).toFixed(0).toString().padStart(2, '0');
+  const minutes = Math.floor(timestamp / 60).toString().padStart(2, '0');
   const seconds = (timestamp % 60).toFixed(3).toString().padStart(6, '0');
   return `${minutes}:${seconds}`;
 }
@@ -176,6 +184,16 @@ function bobbleUpCueListItem(cueItemToReorder) {
 
     cursor = cursor.nextElementSibling;
   }
+}
+
+function playRegion(regionID) {
+  wavesurfer.regions.list[regionID].play();
+}
+
+function deleteRegion(regionID) {
+  const cueItem = document.getElementById(`cue-${regionID}`);
+  cueItem.parentElement.removeChild(cueItem);
+  wavesurfer.regions.list[regionID].remove();
 }
 
 // All Code Below Are From Official Demo, for reference, keep as needed ------------------------------
@@ -276,14 +294,6 @@ function extractRegions(peaks, duration) {
 /**
 * Bind controls.
 */
-window.GLOBAL_ACTIONS['delete-region'] = function () {
-  var form = document.forms.edit;
-  var regionId = form.dataset.region;
-  if (regionId) {
-    wavesurfer.regions.list[regionId].remove();
-    form.reset();
-  }
-};
 
 window.GLOBAL_ACTIONS['export'] = function () {
   window.open(
