@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
   templateOfCueItem = document.getElementById('template-cue-item');
   cuesContainer = document.getElementById('cues');
   audioFileInput = document.getElementById('audio-file');
+  const vttFileInput = document.getElementById('vtt-file');
 
   // Preview Area
   videoPreview = document.getElementById('video-preview');
@@ -43,15 +44,38 @@ document.addEventListener('DOMContentLoaded', function () {
     audioFileInput.click();
   })
 
+  document.getElementById('import-vtt-file').addEventListener('click', () => {
+    vttFileInput.click();
+  })
+
   audioFileInput.addEventListener('change', function(event) {
     const file = audioFileInput.files[0];
 
     if (file) {
-      const blob = URL.createObjectURL(file);
-      wavesurfer.load(blob);
-      audioInPreview.src = blob;
+      const url = URL.createObjectURL(file);
+      wavesurfer.load(url);
+      audioInPreview.src = url;
       audioInPreview.type = file.type;
       videoPreview.load();
+    } else {
+      // TODO: clearAudio()
+    }
+  });
+
+  vttFileInput.addEventListener('change', async function(event) {
+    const file = vttFileInput.files[0];
+
+    if (file) {
+      const cues = await loadVTT(file);
+      cues.forEach(cue => {
+        wavesurfer.addRegion({
+          start: cue.startTime,
+          end: cue.endTime,
+          data: {
+            importedText: cue.text
+          }
+        });
+      });
     } else {
       // TODO: clearAudio()
     }
@@ -114,6 +138,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const textInput = cueItem.querySelector('[data-ref=input]')
     textInput.id = `cue-text-input-${region.id}`;
     textInput.addEventListener('change', () => updateVTT());
+
+    if (region.data && region.data.importedText) {
+      // imported from a file
+      textInput.value = region.data.importedText;
+    }
+
     updateCueListItem(cueItem, region);
     bobbleUpCueListItem(cueItem);
   });
@@ -254,6 +284,30 @@ function actuallyUpdateVTT() {
 
 const updateVTT = debounce(actuallyUpdateVTT, 500);
 
+
+async function loadVTT(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
+
+    const cues = [];
+
+    parser.oncue = function(cue) {
+      cues.push(cue)
+    }
+
+    parser.onflush = function() {
+      resolve(cues);
+    }
+
+    reader.onload = function(event) {
+      parser.parse(event.target.result);
+      parser.flush();
+    };
+
+    reader.readAsText(file);
+  });
+}
 // All Code Below Are From Official Demo, for reference, keep as needed ------------------------------
 // http://wavesurfer-js.org/example/annotation/index.html
 
