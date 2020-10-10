@@ -1,3 +1,45 @@
+.wrapper {
+  display: grid;
+  width: 100vw;
+  height: 100vh;
+
+  grid-template-columns: auto min-content;
+  grid-template-rows: min-content min-content auto min-content;
+  grid-template-areas:
+    "toolbar toolbar"
+    "waveform waveform"
+    "editor preview"
+    "footer footer";
+}
+
+.toolbar {
+  grid-area: toolbar;
+}
+
+.audio-workspace {
+  grid-area: waveform;
+  margin: 1rem;
+}
+
+.editor {
+  grid-area: editor;
+  overflow-y: scroll;
+  margin: 1rem;
+}
+
+.preview {
+  grid-area: preview;
+  margin: 1rem;
+}
+
+.footer {
+  grid-area: footer;
+}
+
+.footer p {
+  margin: 0.5rem 0;
+}
+
 /* Tricks to play audio + subtitles without video. See https://iandevlin.com/blog/2015/12/html5/webvtt-and-audio/ */
 .preview-video {
   border: 1px solid #aaa;

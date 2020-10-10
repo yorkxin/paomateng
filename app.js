@@ -123,6 +123,9 @@ document.addEventListener('DOMContentLoaded', function () {
     scrollParent: true,
     normalize: true,
     minimap: true,
+    barWidth: 2,
+    barHeight: 1,
+    barGap: null,
     plugins: [
       WaveSurfer.regions.create({
         loop: true
