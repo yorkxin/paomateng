@@ -10,6 +10,7 @@ let templateOfCueItem;
 let videoPreview;
 let audioInPreview;
 let subtitlesInPreview;
+let exportVTTFileButton;
 
 // the following colors are from Bootstrap 4 background color with alpha
 const REGION_COLOR_PRIMARY = 'rgba(0, 123, 255, 0.3)';
@@ -34,6 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
   cuesContainer = document.getElementById('cues');
   audioFileInput = document.getElementById('audio-file');
   const vttFileInput = document.getElementById('vtt-file');
+  exportVTTFileButton = document.getElementById('export-vtt-file');
 
   // Preview Area
   videoPreview = document.getElementById('video-preview');
@@ -47,6 +49,31 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('import-vtt-file').addEventListener('click', () => {
     vttFileInput.click();
   })
+
+  if ('showSaveFilePicker' in window) {
+    document.getElementById('export-vtt-file').addEventListener('click', async (event) => {
+      event.preventDefault();
+
+      try {
+        const fileHandle = await window.showSaveFilePicker({
+          types: [
+            {
+              accept: {
+                'text/vtt': '.vtt'
+              },
+            }
+          ],
+        });
+
+        const writable = await fileHandle.createWritable();
+        const vttText = generateVTT();
+        await writable.write(vttText);
+        await writable.close();
+      } catch (error) {
+        console.error(error);
+      }
+    });
+  }
 
   audioFileInput.addEventListener('change', function(event) {
     const file = audioFileInput.files[0];
@@ -270,20 +297,28 @@ function deemphasizeRegion(region) {
   region.update({ color: REGION_COLOR_SECONDARY });
 }
 
-function actuallyUpdateVTT() {
+function generateVTT() {
   const cues = Object.values(wavesurfer.regions.list).map(region => {
     const text = document.getElementById(`cue-text-input-${region.id}`).value;
     return `${formatTime(region.start)} --> ${formatTime(region.end)}\n${text}`;
   })
 
-  const vttText = ["WEBVTT", ...cues].join("\n\n");
+  return ["WEBVTT", ...cues].join("\n\n");
+}
+
+function actuallyUpdateVTT() {
+  const vttText = generateVTT();
   const blob = new Blob([vttText], { type: 'text/vtt' });
   const url = URL.createObjectURL(blob);
   subtitlesInPreview.src = url;
+
+  if ('showSaveFilePicker' in window === false) {
+    // Allow downloading data as a file by clicking this link.
+    exportVTTFileButton.href = "data:text/vtt;charset=utf-8," + encodeURIComponent(vttText);
+  }
 }
 
 const updateVTT = debounce(actuallyUpdateVTT, 500);
-
 
 async function loadVTT(file) {
   return new Promise((resolve, reject) => {
@@ -308,33 +343,9 @@ async function loadVTT(file) {
     reader.readAsText(file);
   });
 }
+
 // All Code Below Are From Official Demo, for reference, keep as needed ------------------------------
 // http://wavesurfer-js.org/example/annotation/index.html
-
-/**
-* Save annotations to localStorage.
-*/
-function saveRegions() {
-  localStorage.regions = JSON.stringify(
-    Object.keys(wavesurfer.regions.list).map(function (id) {
-      var region = wavesurfer.regions.list[id];
-      return {
-        start: region.start,
-        end: region.end,
-        attributes: region.attributes,
-        data: region.data
-      };
-    })
-  );
-}
-/**
-* Load regions from localStorage.
-*/
-function loadRegions(regions) {
-  regions.forEach(function (region) {
-    wavesurfer.addRegion(region);
-  });
-}
 
 /**
 * Extract regions separated by silence.
@@ -402,14 +413,3 @@ function extractRegions(peaks, duration) {
     };
   });
 }
-
-/**
-* Bind controls.
-*/
-
-window.GLOBAL_ACTIONS['export'] = function () {
-  window.open(
-    'data:application/json;charset=utf-8,' +
-    encodeURIComponent(localStorage.regions)
-  );
-};
