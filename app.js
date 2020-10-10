@@ -50,6 +50,13 @@ document.addEventListener('DOMContentLoaded', function () {
     vttFileInput.click();
   })
 
+  document.getElementById('detect-speeches').addEventListener('click', () => {
+    const regions = extractRegions(wavesurfer.backend.getPeaks(1024), wavesurfer.getDuration());
+    regions.forEach(({ start, end }) => {
+      wavesurfer.addRegion({ start, end })
+    })
+  });
+
   if ('showSaveFilePicker' in window) {
     document.getElementById('export-vtt-file').addEventListener('click', async (event) => {
       event.preventDefault();
@@ -144,7 +151,6 @@ document.addEventListener('DOMContentLoaded', function () {
     region.play();
   });
 
-  // wavesurfer.on('region-click', editAnnotation);
   wavesurfer.on('region-created', function (region) {
     const clone = templateOfCueItem.content.cloneNode(true);
     const cueItem = clone.firstElementChild;
