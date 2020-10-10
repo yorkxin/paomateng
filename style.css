@@ -26,3 +26,7 @@
   width: 100%;
   resize: none;
 }
+
+.preview-video::cue {
+  font-size: 24px;
+}

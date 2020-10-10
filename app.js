@@ -4,7 +4,7 @@
 let wavesurfer;
 
 /** @type {HTMLDivElement} */
-let quesContainer;
+let cuesContainer;
 let audioFileInput;
 let templateOfCueItem;
 let videoPreview;
@@ -14,6 +14,20 @@ let subtitlesInPreview;
 // the following colors are from Bootstrap 4 background color with alpha
 const REGION_COLOR_PRIMARY = 'rgba(0, 123, 255, 0.3)';
 const REGION_COLOR_SECONDARY = 'rgba(108, 117, 125, 0.3)';
+
+// from: https://github.com/you-dont-need/You-Dont-Need-Lodash-Underscore#_debounce
+function debounce(func, wait, immediate) {
+  var timeout;
+  return function() {
+  	var context = this, args = arguments;
+  	clearTimeout(timeout);
+  	timeout = setTimeout(function() {
+  		timeout = null;
+  		if (!immediate) func.apply(context, args);
+  	}, wait);
+  	if (immediate && !timeout) func.apply(context, args);
+  };
+}
 
 document.addEventListener('DOMContentLoaded', function () {
   templateOfCueItem = document.getElementById('template-cue-item');
@@ -72,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   wavesurfer.on('region-click', function (region, e) {
     e.stopPropagation();
-    playRegion(region.id);
+    region.play();
   });
 
   // wavesurfer.on('region-click', editAnnotation);
@@ -82,8 +96,20 @@ document.addEventListener('DOMContentLoaded', function () {
     cuesContainer.appendChild(cueItem);
     cueItem.id = `cue-${region.id}`;
     cueItem.dataset['region_id'] = region.id;
-    cueItem.querySelector('[data-ref=play]').addEventListener('click', () => playRegion(region.id));
-    cueItem.querySelector('[data-ref=delete]').addEventListener('click', () => deleteRegion(region.id));
+
+    cueItem.querySelector('[data-ref=play]').addEventListener('click', (event) => {
+      event.preventDefault();
+      region.play();
+    });
+
+    cueItem.querySelector('[data-ref=delete]').addEventListener('click', (event) => {
+      event.preventDefault();
+      region.remove();
+    });
+
+    const textInput = cueItem.querySelector('[data-ref=input]')
+    textInput.id = `cue-text-input-${region.id}`;
+    textInput.addEventListener('change', () => updateVTT());
     updateCueListItem(cueItem, region);
     bobbleUpCueListItem(cueItem);
   });
@@ -92,11 +118,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const cueItem = document.getElementById(`cue-${region.id}`);
     updateCueListItem(cueItem, region);
     bobbleUpCueListItem(cueItem);
+    updateVTT();
   });
 
   wavesurfer.on('region-removed', function (region) {
     const cueItem = document.getElementById(`cue-${region.id}`);
     cuesContainer.removeChild(cueItem);
+    updateVTT();
   });
 
   wavesurfer.on('region-in', function (region) {
@@ -110,24 +138,27 @@ document.addEventListener('DOMContentLoaded', function () {
   /* Toggle play/pause buttons. */
   var playPauseButton = document.querySelector('#play-pause-button');
 
-  wavesurfer.on('play', function () {
+  wavesurfer.on('play', async function () {
     playPauseButton.textContent = "⏸️";
-    // TODO: simultaneously play videoPreview
-    // console.log('play at:', wavesurfer.getCurrentTime())
+    videoPreview.currentTime = wavesurfer.getCurrentTime();
+    await videoPreview.play();
   });
   wavesurfer.on('pause', function () {
     playPauseButton.textContent = "▶️";
-    // TODO: simultaneously pause videoPreview
+    videoPreview.pause();
   });
 
   wavesurfer.on('seek', function() {
+    videoPreview.currentTime = wavesurfer.getCurrentTime();
+
+    Object.values(wavesurfer.regions.list).map(function (region) {
+      deemphasizeRegion(region);
+    });
+
     const region = wavesurfer.regions.getCurrentRegion();
+
     if (region) {
       highlightRegion(region);
-    } else {
-      Object.values(wavesurfer.regions.list).map(function (region) {
-        deemphasizeRegion(region);
-      });
     }
   })
 
@@ -193,16 +224,6 @@ function bobbleUpCueListItem(cueItemToReorder) {
   }
 }
 
-function playRegion(regionID) {
-  wavesurfer.regions.list[regionID].play();
-}
-
-function deleteRegion(regionID) {
-  const cueItem = document.getElementById(`cue-${regionID}`);
-  cueItem.parentElement.removeChild(cueItem);
-  wavesurfer.regions.list[regionID].remove();
-}
-
 function highlightRegion(region) {
   const cueItem = document.getElementById(`cue-${region.id}`);
   cueItem.classList.add('table-primary');
@@ -214,6 +235,20 @@ function deemphasizeRegion(region) {
   cueItem.classList.remove('table-primary');
   region.update({ color: REGION_COLOR_SECONDARY });
 }
+
+function actuallyUpdateVTT() {
+  const cues = Object.values(wavesurfer.regions.list).map(region => {
+    const text = document.getElementById(`cue-text-input-${region.id}`).value;
+    return `${formatTime(region.start)} --> ${formatTime(region.end)}\n${text}`;
+  })
+
+  const vttText = ["WEBVTT", ...cues].join("\n\n");
+  const blob = new Blob([vttText], { type: 'text/vtt' });
+  const url = URL.createObjectURL(blob);
+  subtitlesInPreview.src = url;
+}
+
+const updateVTT = debounce(actuallyUpdateVTT, 500);
 
 // All Code Below Are From Official Demo, for reference, keep as needed ------------------------------
 // http://wavesurfer-js.org/example/annotation/index.html
