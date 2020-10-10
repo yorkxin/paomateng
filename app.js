@@ -100,15 +100,11 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   wavesurfer.on('region-in', function (region) {
-    const cueItem = document.getElementById(`cue-${region.id}`);
-    cueItem.classList.add('table-primary');
-    region.update({ color: REGION_COLOR_PRIMARY });
+    highlightRegion(region);
   });
 
   wavesurfer.on('region-out', function (region) {
-    const cueItem = document.getElementById(`cue-${region.id}`);
-    cueItem.classList.remove('table-primary');
-    region.update({ color: REGION_COLOR_SECONDARY });
+    deemphasizeRegion(region);
   });
 
   /* Toggle play/pause buttons. */
@@ -123,6 +119,17 @@ document.addEventListener('DOMContentLoaded', function () {
     playPauseButton.textContent = "▶️";
     // TODO: simultaneously pause videoPreview
   });
+
+  wavesurfer.on('seek', function() {
+    const region = wavesurfer.regions.getCurrentRegion();
+    if (region) {
+      highlightRegion(region);
+    } else {
+      Object.values(wavesurfer.regions.list).map(function (region) {
+        deemphasizeRegion(region);
+      });
+    }
+  })
 
   playPauseButton.addEventListener('click', (event) => {
     if (wavesurfer.isPlaying()) {
@@ -194,6 +201,18 @@ function deleteRegion(regionID) {
   const cueItem = document.getElementById(`cue-${regionID}`);
   cueItem.parentElement.removeChild(cueItem);
   wavesurfer.regions.list[regionID].remove();
+}
+
+function highlightRegion(region) {
+  const cueItem = document.getElementById(`cue-${region.id}`);
+  cueItem.classList.add('table-primary');
+  region.update({ color: REGION_COLOR_PRIMARY });
+}
+
+function deemphasizeRegion(region) {
+  const cueItem = document.getElementById(`cue-${region.id}`);
+  cueItem.classList.remove('table-primary');
+  region.update({ color: REGION_COLOR_SECONDARY });
 }
 
 // All Code Below Are From Official Demo, for reference, keep as needed ------------------------------
