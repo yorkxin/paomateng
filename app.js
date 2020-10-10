@@ -353,7 +353,7 @@ async function loadVTT(file) {
   });
 }
 
-// All Code Below Are From Official Demo, for reference, keep as needed ------------------------------
+// All Code Below Are From Official Demo, BSD-3-Clause License.
 // http://wavesurfer-js.org/example/annotation/index.html
 
 /**
